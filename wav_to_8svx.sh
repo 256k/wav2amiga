@@ -1,22 +1,23 @@
 #!/usr/bin/env bash
 #
-# wav_to_8svx.sh
+# wav_to_8svx.sh (installed globally as `wav2amiga`)
 #
-# Recursively converts every .wav file found in the same directory as this
-# script (and all its subdirectories) into Amiga 8SVX format, using the
+# Recursively converts every .wav file found in the current working
+# directory (and all its subdirectories) into Amiga 8SVX format, using the
 # standard specs expected by ProTracker / OctaMED:
 #
 #     - 8-bit signed PCM
 #     - Mono
 #     - 8363 Hz sample rate (the standard Amiga/ProTracker "C-2" reference rate)
 #
-# Output is written to a "W2A-8SVX/<root-folder-name>" folder created next
-# to this script, with the same subfolder structure as the source files.
+# Output is written to a "W2A-8SVX/<root-folder-name>" folder created in
+# the current working directory, with the same subfolder structure as the
+# source files.
 #
-# No arguments needed - just drop this script at the root of the folder
-# tree you want converted and run it:
+# No arguments needed - install once (see README), then cd into any
+# folder of .wav files and run:
 #
-#     ./wav_to_8svx.sh
+#     wav2amiga
 #
 # Requires: sox
 #   WSL/Debian/Ubuntu install:  sudo apt-get install sox
@@ -34,27 +35,9 @@ OUT_EXT="8svx"
 MAX_NAME_LEN=30   # AmigaOS OFS/FFS name limit (applies to files and folders alike)
 
 # ---------------------------------------------------------------------------
-# Resolve root directory = the directory this script lives in
-#
-# `readlink -f` is GNU-only; macOS ships BSD readlink without -f support,
-# so resolve the script's real path with a portable readlink/pwd loop instead.
+# Resolve root directory = the directory the command was invoked from
 # ---------------------------------------------------------------------------
-resolve_script_path() {
-    local target="$1"
-    while [[ -L "$target" ]]; do
-        local link
-        link="$(readlink "$target")"
-        if [[ "$link" == /* ]]; then
-            target="$link"
-        else
-            target="$(dirname "$target")/$link"
-        fi
-    done
-    echo "$target"
-}
-
-SCRIPT_PATH="$(cd "$(dirname "$(resolve_script_path "$0")")" && pwd)/$(basename "$(resolve_script_path "$0")")"
-ROOT_DIR="$(dirname "$SCRIPT_PATH")"
+ROOT_DIR="$(pwd)"
 TOP_OUTPUT_DIR="$ROOT_DIR/W2A-8SVX"
 
 root_name="$(basename "$ROOT_DIR")"
