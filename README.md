@@ -46,4 +46,4 @@ For an input file at `ROOT/some/subfolder/kick.wav`, the output will be written 
 
 ---
 
-*This README was generated with the help of an LLM (Claude).*
+*This script and README were written with the help of an LLM (Claude).*
