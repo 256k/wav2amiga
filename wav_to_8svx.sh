@@ -31,6 +31,7 @@ BIT_DEPTH=8
 CHANNELS=1
 ENCODING="signed-integer"
 OUT_EXT="8svx"
+MAX_FILENAME_LEN=30   # AmigaOS OFS/FFS filename limit (incl. extension)
 
 # ---------------------------------------------------------------------------
 # Resolve root directory = the directory this script lives in
@@ -92,6 +93,13 @@ while IFS= read -r -d '' wav_file; do
     base_name="$(basename "$rel_path")"
     base_name_noext="${base_name%.[wW][aA][vV]}"
 
+    max_base_len=$((MAX_FILENAME_LEN - ${#OUT_EXT} - 1))  # -1 for the dot
+    truncated=0
+    if (( ${#base_name_noext} > max_base_len )); then
+        base_name_noext="${base_name_noext:0:max_base_len}"
+        truncated=1
+    fi
+
     dest_dir="$OUTPUT_DIR"
     if [[ "$rel_dir" != "." ]]; then
         dest_dir="$OUTPUT_DIR/$rel_dir"
@@ -101,6 +109,9 @@ while IFS= read -r -d '' wav_file; do
     dest_file="$dest_dir/${base_name_noext}.${OUT_EXT}"
 
     echo "Converting: $rel_path"
+    if (( truncated )); then
+        echo "  Note: truncated filename to fit Amiga's ${MAX_FILENAME_LEN}-char limit -> $(basename "$dest_file")"
+    fi
     if sox "$wav_file" -b "$BIT_DEPTH" -c "$CHANNELS" -r "$SAMPLE_RATE" -e "$ENCODING" "$dest_file" 2>/tmp/sox_err.log; then
         converted=$((converted + 1))
     else
