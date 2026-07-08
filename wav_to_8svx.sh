@@ -10,8 +10,8 @@
 #     - Mono
 #     - 8363 Hz sample rate (the standard Amiga/ProTracker "C-2" reference rate)
 #
-# Output is written to an "amiga-export" folder created next to this script,
-# with the same subfolder structure as the source files.
+# Output is written to a "W2A-8SVX/<root-folder-name>" folder created next
+# to this script, with the same subfolder structure as the source files.
 #
 # No arguments needed - just drop this script at the root of the folder
 # tree you want converted and run it:
@@ -31,7 +31,7 @@ BIT_DEPTH=8
 CHANNELS=1
 ENCODING="signed-integer"
 OUT_EXT="8svx"
-MAX_FILENAME_LEN=30   # AmigaOS OFS/FFS filename limit (incl. extension)
+MAX_NAME_LEN=30   # AmigaOS OFS/FFS name limit (applies to files and folders alike)
 
 # ---------------------------------------------------------------------------
 # Resolve root directory = the directory this script lives in
@@ -55,7 +55,16 @@ resolve_script_path() {
 
 SCRIPT_PATH="$(cd "$(dirname "$(resolve_script_path "$0")")" && pwd)/$(basename "$(resolve_script_path "$0")")"
 ROOT_DIR="$(dirname "$SCRIPT_PATH")"
-OUTPUT_DIR="$ROOT_DIR/amiga-export"
+TOP_OUTPUT_DIR="$ROOT_DIR/W2A-8SVX"
+
+root_name="$(basename "$ROOT_DIR")"
+root_name_truncated="$root_name"
+if (( ${#root_name} > MAX_NAME_LEN )); then
+    root_name_truncated="${root_name:0:MAX_NAME_LEN}"
+    echo "Note: truncated root folder name to fit Amiga's ${MAX_NAME_LEN}-char limit: '$root_name' -> '$root_name_truncated'"
+fi
+
+OUTPUT_DIR="$TOP_OUTPUT_DIR/$root_name_truncated"
 
 # ---------------------------------------------------------------------------
 # Sanity checks
@@ -83,7 +92,7 @@ total=0
 converted=0
 failed=0
 
-# Skip the amiga-export folder itself so re-running the script doesn't
+# Skip the W2A-8SVX folder itself so re-running the script doesn't
 # try to re-convert its own previous output.
 while IFS= read -r -d '' wav_file; do
     total=$((total + 1))
@@ -93,7 +102,7 @@ while IFS= read -r -d '' wav_file; do
     base_name="$(basename "$rel_path")"
     base_name_noext="${base_name%.[wW][aA][vV]}"
 
-    max_base_len=$((MAX_FILENAME_LEN - ${#OUT_EXT} - 1))  # -1 for the dot
+    max_base_len=$((MAX_NAME_LEN - ${#OUT_EXT} - 1))  # -1 for the dot
     truncated=0
     if (( ${#base_name_noext} > max_base_len )); then
         base_name_noext="${base_name_noext:0:max_base_len}"
@@ -110,7 +119,7 @@ while IFS= read -r -d '' wav_file; do
 
     echo "Converting: $rel_path"
     if (( truncated )); then
-        echo "  Note: truncated filename to fit Amiga's ${MAX_FILENAME_LEN}-char limit -> $(basename "$dest_file")"
+        echo "  Note: truncated filename to fit Amiga's ${MAX_NAME_LEN}-char limit -> $(basename "$dest_file")"
     fi
     if sox "$wav_file" -b "$BIT_DEPTH" -c "$CHANNELS" -r "$SAMPLE_RATE" -e "$ENCODING" "$dest_file" 2>/tmp/sox_err.log; then
         converted=$((converted + 1))
@@ -118,7 +127,7 @@ while IFS= read -r -d '' wav_file; do
         failed=$((failed + 1))
         echo "  FAILED: $(cat /tmp/sox_err.log)" >&2
     fi
-done < <(find "$ROOT_DIR" -type f -iname "*.wav" -not -path "$OUTPUT_DIR/*" -print0)
+done < <(find "$ROOT_DIR" -type f -iname "*.wav" -not -path "$TOP_OUTPUT_DIR/*" -print0)
 
 echo ""
 echo "----------------------------------------"
