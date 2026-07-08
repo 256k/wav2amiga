@@ -10,9 +10,9 @@
 #     - Mono
 #     - 8363 Hz sample rate (the standard Amiga/ProTracker "C-2" reference rate)
 #
-# Output is written to a "W2A-8SVX/<root-folder-name>" folder created in
-# the current working directory, with the same subfolder structure as the
-# source files.
+# Output is written to a "W2A-8SVX-<sample-rate>hz/<root-folder-name>"
+# folder created in the current working directory, with the same
+# subfolder structure as the source files.
 #
 # No arguments needed - install once (see README), then cd into any
 # folder of .wav files and run:
@@ -38,7 +38,7 @@ MAX_NAME_LEN=30   # AmigaOS OFS/FFS name limit (applies to files and folders ali
 # Resolve root directory = the directory the command was invoked from
 # ---------------------------------------------------------------------------
 ROOT_DIR="$(pwd)"
-TOP_OUTPUT_DIR="$ROOT_DIR/W2A-8SVX"
+TOP_OUTPUT_DIR="$ROOT_DIR/W2A-8SVX-${SAMPLE_RATE}hz"
 
 root_name="$(basename "$ROOT_DIR")"
 root_name_truncated="$root_name"
@@ -75,8 +75,8 @@ total=0
 converted=0
 failed=0
 
-# Skip the W2A-8SVX folder itself so re-running the script doesn't
-# try to re-convert its own previous output.
+# Skip the W2A-8SVX-<sample-rate>hz folder itself so re-running the
+# script doesn't try to re-convert its own previous output.
 while IFS= read -r -d '' wav_file; do
     total=$((total + 1))
 

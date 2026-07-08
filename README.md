@@ -10,7 +10,7 @@ A small Bash script that batch-converts `.wav` files into Amiga `8SVX` format, u
 - Mono
 - 8363 Hz sample rate (the standard Amiga/ProTracker "C-2" reference rate)
 
-Converted files are written to a `W2A-8SVX/<root-folder-name>` folder created in the current working directory, mirroring the original subfolder structure. `<root-folder-name>` is the name of the folder you ran the command from, truncated if needed to fit AmigaOS's 30-character name limit. The `W2A-8SVX` folder itself is skipped when scanning, so the command can be safely re-run.
+Converted files are written to a `W2A-8SVX-8363hz/<root-folder-name>` folder created in the current working directory, mirroring the original subfolder structure (the sample rate in the folder name reflects the fixed 8363 Hz output rate above). `<root-folder-name>` is the name of the folder you ran the command from, truncated if needed to fit AmigaOS's 30-character name limit. The `W2A-8SVX-8363hz` folder itself is skipped when scanning, so the command can be safely re-run.
 
 Individual output filenames are also truncated to fit the same 30-character limit (including the `.8svx` extension), since classic AmigaOS filesystems (OFS/FFS) reject or mangle longer names.
 
@@ -55,7 +55,7 @@ No arguments are needed. The command will print progress for each file and a sum
 
 ## Output
 
-If you run `wav2amiga` inside a folder named `mysamples`, an input file at `mysamples/some/subfolder/kick.wav` will be written to `mysamples/W2A-8SVX/mysamples/some/subfolder/kick.8svx`.
+If you run `wav2amiga` inside a folder named `mysamples`, an input file at `mysamples/some/subfolder/kick.wav` will be written to `mysamples/W2A-8SVX-8363hz/mysamples/some/subfolder/kick.8svx`.
 
 If either the root folder name or a converted filename (including its `.8svx` extension) would exceed 30 characters, it's truncated to fit, and the script prints a note when this happens.
 
